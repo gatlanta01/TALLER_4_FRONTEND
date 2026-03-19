@@ -1,0 +1,99 @@
+/*
+ * Tema GestiónPro - Tema Morado/Violeta
+ * Autor: Felipe Andres Cardenas Restrepo
+ * Descripcion: Override del color primario (azul -> morado/violeta)
+ */
+
+/* ===================== Variables de color ===================== */
+:root {
+    --primary-color: #6f42c1;
+    --primary-dark: #5a32a3;
+    --primary-light: #9b72d4;
+}
+
+/* ===================== Sidebar morado ========================= */
+.bg-gradient-primary {
+    background: linear-gradient(180deg, #9b72d4 10%, #6f42c1 100%) !important;
+    background-color: #6f42c1 !important;
+}
+
+/* ===================== Botones primarios ====================== */
+.btn-primary {
+    background-color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+    color: #fff !important;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #5a32a3 !important;
+    border-color: #5a32a3 !important;
+}
+
+/* ===================== Textos primarios ======================= */
+.text-primary {
+    color: #6f42c1 !important;
+}
+
+/* ===================== Bordes primarios ======================= */
+.border-left-primary {
+    border-left: 0.25rem solid #6f42c1 !important;
+}
+
+/* ===================== Fondos primarios ======================= */
+.bg-primary {
+    background-color: #6f42c1 !important;
+}
+
+/* ===================== Icon circles ========================= */
+.icon-circle.bg-primary {
+    background-color: #6f42c1 !important;
+}
+
+/* ===================== Scrollbar sidebar ==================== */
+.sidebar .nav-item .nav-link[data-toggle="collapse"]::after {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ===================== Card border colors =================== */
+.card.border-left-primary {
+    border-left: 0.25rem solid #6f42c1 !important;
+}
+
+/* ===================== Footer personalizado ================= */
+.sticky-footer {
+    border-top: 3px solid #6f42c1;
+}
+
+.sticky-footer .copyright {
+    font-size: 0.80rem;
+    color: #858796;
+}
+
+/* ===================== Topbar - botón buscar ================ */
+.navbar-search .btn-primary {
+    background-color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+}
+
+/* ===================== Scroll to top button ================= */
+.scroll-to-top {
+    background-color: #6f42c1 !important;
+    color: #fff !important;
+}
+
+/* ===================== Login / Register body ================ */
+body.bg-gradient-primary {
+    background: linear-gradient(180deg, #9b72d4 10%, #6f42c1 100%) !important;
+}
+
+/* ===================== Progress bars ======================= */
+.progress-bar {
+    background-color: #6f42c1 !important;
+}
+
+/* === Colores de barras de progreso individuales (mantener) === */
+.progress-bar.bg-danger    { background-color: #e74a3b !important; }
+.progress-bar.bg-warning   { background-color: #f6c23e !important; }
+.progress-bar.bg-info      { background-color: #36b9cc !important; }
+.progress-bar.bg-success   { background-color: #1cc88a !important; }
