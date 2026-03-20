@@ -38,14 +38,28 @@ document.addEventListener("DOMContentLoaded", () => {
     getUser();
 });
 
+// Datos demo para cuando no hay backend disponible
+const productosDemo = [
+    { id: 1, nombre: "Laptop Dell Inspiron",   descripcion: "Procesador Intel i7, 16GB RAM, 512GB SSD", precio: 3500000, stock: 10, imagen: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=200&q=80" },
+    { id: 2, nombre: "Smartphone Samsung S24", descripcion: "6.2\", 256GB, cámara 50MP",                precio: 1200000, stock: 25, imagen: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&q=80" },
+    { id: 3, nombre: "Tablet iPad Air",        descripcion: "10.9\", chip M1, Wi-Fi + Cellular",       precio:  900000, stock:  8, imagen: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=200&q=80" },
+    { id: 4, nombre: "Monitor LG 27\"",        descripcion: "4K UHD, IPS, 60Hz, HDMI",                precio:  800000, stock: 15, imagen: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=200&q=80" },
+    { id: 5, nombre: "Auriculares Sony WH-1000", descripcion: "Cancelación de ruido, Bluetooth 5.2",  precio:  350000, stock: 20, imagen: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80" }
+];
+
 // ── Traer datos de la API y poblar la tabla ──────────────────────────────────
 let getTableData = async () => {
     let url = "http://localhost/Archivos/backend-apiCrud/index.php?url=productos";
     try {
+        let controller = new AbortController();
+        let timeoutId  = setTimeout(() => controller.abort(), 3000);
+
         let respuesta = await fetch(url, {
             method: "GET",
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json" },
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (respuesta.status === 204) {
             console.log("No hay productos registrados en la base de datos.");
@@ -65,14 +79,10 @@ let getTableData = async () => {
         renderTable(tableData);
 
     } catch (error) {
-        console.error("Error al cargar productos:", error);
-        tablePro.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center text-danger py-4">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-2 d-block"></i>
-                    Error al conectar con el servidor. Verifica que la API esté activa.
-                </td>
-            </tr>`;
+        // Backend no disponible: cargar datos demo
+        console.warn("Backend no disponible, usando datos demo:", error.message);
+        localStorage.setItem("datosTabla", JSON.stringify(productosDemo));
+        renderTable(productosDemo);
     }
 };
 

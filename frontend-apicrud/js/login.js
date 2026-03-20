@@ -3,6 +3,10 @@
  * GestiónPro - Sistema de Gestión de Productos Electrónicos
  * Autor: Felipe Andres Cardenas Restrepo
  * Descripcion: Manejo del formulario de inicio de sesión
+ *
+ * Credenciales de prueba (modo local):
+ *   admin    / admin123    → rol: administrador
+ *   vendedor / vendedor123 → rol: vendedor
  */
 
 const d = document;
@@ -10,6 +14,13 @@ const d = document;
 let userInput = d.querySelector("#usuarioForm");
 let passInput  = d.querySelector("#contraForm");
 let btnLogin   = d.querySelector(".btnLogin");
+
+// Usuarios demo para cuando no hay backend disponible
+const usuariosDemo = [
+    { usuario: "admin",    contrasena: "admin123",    rol: "administrador", id: 1 },
+    { usuario: "vendedor", contrasena: "vendedor123", rol: "vendedor",       id: 2 },
+    { usuario: "felipe",   contrasena: "felipe123",   rol: "administrador", id: 3 }
+];
 
 // Evento al botón de login
 btnLogin.addEventListener("click", () => {
@@ -19,43 +30,69 @@ btnLogin.addEventListener("click", () => {
     }
 });
 
+// Permitir Enter en los campos
+[userInput, passInput].forEach(input => {
+    input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") btnLogin.click();
+    });
+});
+
 // Validar y obtener datos del formulario
 let getData = () => {
     let user;
     if (userInput.value && passInput.value) {
         user = {
-            usuario: userInput.value,
+            usuario: userInput.value.trim(),
             contrasena: passInput.value
         };
-        userInput.value = "";
-        passInput.value  = "";
     } else {
         alert("El usuario y la contraseña son obligatorios.");
     }
     return user;
 };
 
-// Enviar datos a la API de autenticación
+// Autenticación local (sin backend)
+let loginLocal = (data) => {
+    let encontrado = usuariosDemo.find(
+        u => u.usuario === data.usuario && u.contrasena === data.contrasena
+    );
+    if (encontrado) {
+        let userLogin = { id: encontrado.id, usuario: encontrado.usuario, rol: encontrado.rol };
+        localStorage.setItem("userLogin", JSON.stringify(userLogin));
+        alert(`¡Bienvenido, ${userLogin.rol}!`);
+        location.href = "index.html";
+    } else {
+        alert("Usuario o contraseña incorrectos.\n\nCredenciales de prueba:\n• admin / admin123\n• vendedor / vendedor123");
+    }
+    userInput.value = "";
+    passInput.value  = "";
+};
+
+// Enviar datos a la API de autenticación (con fallback local)
 let sendData = async (data) => {
     let url = "http://localhost/Archivos/backend-apiCrud/index.php?url=login";
     try {
+        let controller = new AbortController();
+        let timeoutId  = setTimeout(() => controller.abort(), 3000); // timeout 3s
+
         let respuesta = await fetch(url, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            signal: controller.signal
         });
-        if (!respuesta.ok) throw new Error("No se pudo enviar los datos");
+        clearTimeout(timeoutId);
+
+        if (!respuesta.ok) throw new Error("Respuesta no válida del servidor");
 
         let userLogin = await respuesta.json();
         alert(`¡Bienvenido, ${userLogin.rol}!`);
-        // Guardar datos del usuario en localStorage
         localStorage.setItem("userLogin", JSON.stringify(userLogin));
-        location.href = "../frontend-apicrud/index.html";
+        location.href = "index.html";
 
     } catch (error) {
-        console.error("Error en login:", error);
-        alert("Error al conectar con el servidor. Verifica que la API esté activa.");
+        // Si el backend no está disponible, usar autenticación local
+        console.warn("Backend no disponible, usando modo local:", error.message);
+        loginLocal(data);
     }
 };

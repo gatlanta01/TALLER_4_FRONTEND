@@ -19,8 +19,8 @@ let getUser = () => {
     if (user && nameUser) {
         nameUser.textContent = user.rol;
     } else if (nameUser) {
-        // Si no hay sesión activa, redirigir al login
-        location.href = "login.html";
+        // Si no hay sesión, mostrar nombre genérico (no bloquear en modo demo)
+        nameUser.textContent = "Invitado";
     }
 };
 

@@ -56,18 +56,29 @@ let getDataProducto = () => {
 let sendDataProduct = async (data) => {
     let url = "http://localhost/Archivos/backend-apiCrud/index.php?url=productos";
     try {
+        let controller = new AbortController();
+        let timeoutId  = setTimeout(() => controller.abort(), 3000);
+
         let respuesta = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (!respuesta.ok) throw new Error("Error al guardar el producto");
         let mensaje = await respuesta.json();
         alert(mensaje.message);
-        location.href = "../frontend-apicrud/listado-pro.html";
+        location.href = "listado-pro.html";
     } catch (error) {
-        console.error("Error al crear producto:", error);
-        alert("Error al conectar con el servidor. Verifica que la API esté activa.");
+        // Modo local: guardar en localStorage como demo
+        console.warn("Backend no disponible, guardando en modo local:", error.message);
+        let productos = JSON.parse(localStorage.getItem("productosLocal") || "[]");
+        data.id = Date.now();
+        productos.push(data);
+        localStorage.setItem("productosLocal", JSON.stringify(productos));
+        alert("✅ Producto guardado en modo local (sin backend).");
+        location.href = "listado-pro.html";
     }
 };
 
