@@ -112,6 +112,9 @@ let renderTable = (datos) => {
                      alt="${dato.nombre}">
             </td>
             <td>
+                <button onclick="exportarPDF(${i})" type="button" class="btn btn-info btn-sm mr-1" title="Exportar PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
                 <button onclick="editDataTable(${i})" type="button" class="btn btn-warning btn-sm mr-1" title="Editar">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -131,7 +134,7 @@ let editDataTable = (pos) => {
     if (!productsSave) return;
     let singleProduct = productsSave[pos];
     localStorage.setItem("productEdit", JSON.stringify(singleProduct));
-    localStorage.removeItem("datosTabla");
+    // NO se borra datosTabla aquí para que el fallback local funcione al volver
     location.href = "crear-pro.html";
 };
 
@@ -149,23 +152,111 @@ let deleteDataTable = (pos) => {
 let sendDeleteProduct = async (id) => {
     let url = "http://localhost/Archivos/backend-apiCrud/index.php?url=productos";
     try {
+        let controller = new AbortController();
+        let timeoutId  = setTimeout(() => controller.abort(), 3000);
+
         let respuesta = await fetch(url, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(id)
+            body: JSON.stringify(id),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
         if (!respuesta.ok) throw new Error("El id enviado no fue admitido");
         let mensaje = await respuesta.json();
         alert(mensaje.message);
         location.reload();
     } catch (error) {
-        console.error("Error al eliminar:", error);
+        // Backend no disponible: eliminar localmente del datosTabla
+        console.warn("Backend no disponible, eliminando localmente:", error.message);
+        let productos = JSON.parse(localStorage.getItem("datosTabla") || "[]");
+        let nuevos = productos.filter(p => String(p.id) !== String(id.id));
+        localStorage.setItem("datosTabla", JSON.stringify(nuevos));
+        renderTable(nuevos);
+        alert("✅ Producto eliminado localmente.");
     }
 };
 
 // ── Limpiar tabla ────────────────────────────────────────────────────────────
 let clearDataTable = () => {
     document.querySelectorAll("#table-pro > tbody > tr").forEach(row => row.remove());
+};
+
+// ── Exportar ficha de producto en PDF ────────────────────────────────────────
+let exportarPDF = (pos) => {
+    let productos = JSON.parse(localStorage.getItem("datosTabla") || "[]");
+    let p = productos[pos];
+    if (!p) { alert("No se encontró el producto."); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Encabezado morado
+    doc.setFillColor(111, 66, 193);
+    doc.rect(0, 0, 210, 38, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('GestionPro', 14, 20);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Ficha de Producto Electronico', 14, 30);
+
+    // Línea separadora
+    doc.setDrawColor(111, 66, 193);
+    doc.setLineWidth(0.5);
+    doc.line(14, 44, 196, 44);
+
+    // Nombre del producto
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(17);
+    doc.setFont('helvetica', 'bold');
+    doc.text(p.nombre, 14, 55);
+
+    // Descripción
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    let lineas = doc.splitTextToSize(p.descripcion, 180);
+    doc.text(lineas, 14, 65);
+
+    let yPos = 65 + lineas.length * 6 + 8;
+
+    // Precio
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(111, 66, 193);
+    doc.text('Precio:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    doc.text('$' + parseInt(p.precio).toLocaleString('es-CO') + ' COP', 42, yPos);
+
+    // Stock
+    yPos += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(111, 66, 193);
+    doc.text('Stock:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    doc.text(String(p.stock) + ' unidades disponibles', 40, yPos);
+
+    // ID
+    yPos += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(111, 66, 193);
+    doc.text('ID Producto:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(40, 40, 40);
+    doc.text(String(p.id), 54, yPos);
+
+    // Pie de página
+    doc.setFontSize(9);
+    doc.setTextColor(160, 160, 160);
+    doc.text('Generado por GestionPro | Autor: Felipe Andres Cardenas Restrepo', 14, 285);
+    doc.text(new Date().toLocaleDateString('es-CO'), 175, 285);
+
+    doc.save('producto-' + p.nombre.replace(/\s+/g, '-') + '.pdf');
 };
 
 // ── Buscar producto en la tabla ──────────────────────────────────────────────
@@ -201,6 +292,9 @@ let searchProductTable = () => {
                          alt="${pro.nombre}">
                 </td>
                 <td>
+                    <button onclick="exportarPDF(${i})" type="button" class="btn btn-info btn-sm mr-1" title="Exportar PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
                     <button onclick="editDataTable(${i})" type="button" class="btn btn-warning btn-sm mr-1" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>

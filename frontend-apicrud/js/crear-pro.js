@@ -112,20 +112,36 @@ let updateDataProduct = () => {
 let sendUpdateProduct = async (pro) => {
     let url = "http://localhost/Archivos/backend-apiCrud/index.php?url=productos";
     try {
+        let controller = new AbortController();
+        let timeoutId  = setTimeout(() => controller.abort(), 3000);
+
         let respuesta = await fetch(url, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(pro)
+            body: JSON.stringify(pro),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
         if (respuesta.status === 406) {
             alert("Los datos enviados no son admitidos.");
         } else {
             let mensaje = await respuesta.json();
             alert(mensaje.message);
-            location.href = "../frontend-apicrud/listado-pro.html";
+            location.href = "listado-pro.html";
         }
     } catch (error) {
-        console.error("Error al actualizar producto:", error);
-        alert("Error al conectar con el servidor. Verifica que la API esté activa.");
+        // Backend no disponible: actualizar localmente en datosTabla
+        console.warn("Backend no disponible, actualizando localmente:", error.message);
+        let productos = JSON.parse(localStorage.getItem("datosTabla") || "[]");
+        let idx = productos.findIndex(p => String(p.id) === String(pro.id));
+        if (idx !== -1) {
+            productos[idx] = pro;
+        } else {
+            productos.push(pro);
+        }
+        localStorage.setItem("datosTabla", JSON.stringify(productos));
+        alert("✅ Producto actualizado en modo local (sin backend).");
+        location.href = "listado-pro.html";
     }
 };
