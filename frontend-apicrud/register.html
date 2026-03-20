@@ -36,7 +36,10 @@
                                 </h1>
                                 <p class="text-muted mb-4">Únete a GestiónPro y administra tus productos electrónicos</p>
                             </div>
-                            <form class="user">
+                            <!-- Alerta de resultado -->
+                            <div id="alerta-registro" class="d-none alert mb-3" role="alert"></div>
+
+                            <form class="user" id="form-registro">
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
                                         <input type="text" class="form-control form-control-user"
@@ -46,6 +49,10 @@
                                         <input type="text" class="form-control form-control-user"
                                             id="primerApellido" placeholder="Apellido">
                                     </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control form-control-user"
+                                        id="usuarioReg" placeholder="Nombre de usuario (para iniciar sesión)">
                                 </div>
                                 <div class="form-group">
                                     <input type="email" class="form-control form-control-user"
@@ -61,9 +68,16 @@
                                             id="repetirContrasena" placeholder="Repetir Contraseña">
                                     </div>
                                 </div>
-                                <a href="login.html" class="btn btn-primary btn-user btn-block">
+                                <!-- Rol -->
+                                <div class="form-group">
+                                    <select id="rolUsuario" class="form-control form-control-user">
+                                        <option value="administrador">Administrador</option>
+                                        <option value="vendedor">Vendedor</option>
+                                    </select>
+                                </div>
+                                <button type="button" id="btnRegistrar" class="btn btn-primary btn-user btn-block">
                                     <i class="fas fa-user-check fa-fw mr-2"></i> Registrar Cuenta
-                                </a>
+                                </button>
                                 <hr>
                                 <a href="index.html" class="btn btn-google btn-user btn-block">
                                     <i class="fab fa-google fa-fw"></i> Registrar con Google
@@ -100,6 +114,8 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js"></script>
     <!-- SB Admin 2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <!-- Script de registro -->
+    <script src="js/register.js"></script>
 </body>
 
 </html>

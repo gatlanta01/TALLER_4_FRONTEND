@@ -52,17 +52,33 @@ let getData = () => {
 };
 
 // Autenticación local (sin backend)
+// Revisa usuarios demo + usuarios registrados desde register.html
 let loginLocal = (data) => {
+    // 1. Buscar en usuarios demo predefinidos
     let encontrado = usuariosDemo.find(
         u => u.usuario === data.usuario && u.contrasena === data.contrasena
     );
+
+    // 2. Si no está en demo, buscar en usuarios registrados (localStorage)
+    if (!encontrado) {
+        const usuariosRegistrados = JSON.parse(localStorage.getItem("usuariosRegistrados") || "[]");
+        encontrado = usuariosRegistrados.find(
+            u => u.usuario === data.usuario && u.contrasena === data.contrasena
+        );
+    }
+
     if (encontrado) {
-        let userLogin = { id: encontrado.id, usuario: encontrado.usuario, rol: encontrado.rol };
+        let userLogin = {
+            id:      encontrado.id,
+            usuario: encontrado.usuario,
+            rol:     encontrado.rol,
+            nombre:  encontrado.nombre || encontrado.usuario
+        };
         localStorage.setItem("userLogin", JSON.stringify(userLogin));
-        alert(`¡Bienvenido, ${userLogin.rol}!`);
+        alert(`¡Bienvenido, ${userLogin.nombre || userLogin.rol}!`);
         location.href = "index.html";
     } else {
-        alert("Usuario o contraseña incorrectos.\n\nCredenciales de prueba:\n• admin / admin123\n• vendedor / vendedor123");
+        alert("Usuario o contraseña incorrectos.\n\nCredenciales de prueba:\n• admin / admin123\n• vendedor / vendedor123\n\nO usa las credenciales con las que te registraste.");
     }
     userInput.value = "";
     passInput.value  = "";
